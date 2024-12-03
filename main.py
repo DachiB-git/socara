@@ -19,11 +19,12 @@ doc_id = ""
 doc_url = ""
 date = ""
 driver = webdriver.Chrome()
-
+not_processed = []
 
 def get_file():
     global file_data
     global text_box
+    file_data = []
     fh = tkinter.filedialog.askopenfile()
     reader = csv.reader(fh)
     for row in reader:
@@ -74,6 +75,8 @@ def start_robot():
     possible_options = ["კორექტორი", "მრიცხველი"]
     control_checkbox_id = "IsControl"
     div_success_class = "alert-success-msg"
+    clean_btn_value = "გასუფთავება"
+    cross_clear_btn_class = "clear"
     # submit_btn type=submit
     if auth:
         root.wm_state("iconic")
@@ -138,12 +141,28 @@ def start_robot():
 
                 option_value = file_data[row][3 if is_mricxveli else 2]
                 new_value_input.send_keys(option_value)
-                consumption_delta = driver.find_element(By.ID, consumption_id).get_attribute("value")
-                print(consumption_delta)
+                consumption_delta = None
 
                 date_input = driver.find_element(By.ID, date_input_id)
                 date_input.send_keys(date)
                 date_input.send_keys(Keys.ENTER)
+
+                while True:
+                    consumption_delta_input = driver.find_element(By.ID, consumption_id)
+                    consumption_delta_str = consumption_delta_input.get_attribute("value")
+                    if len(consumption_delta_str) != 0:
+                        print("str: " + consumption_delta_str)
+                        consumption_delta = int(consumption_delta_str)
+                        print("numeric: " + str(consumption_delta))
+                        break
+                    else:
+                        continue
+
+                if consumption_delta < 0:
+                    not_processed.append([mp, current_option])
+                    driver.find_element(By.CSS_SELECTOR, "[value='გასუფთავება'").click()
+                    driver.find_element(By.CLASS_NAME, cross_clear_btn_class).click()
+                    continue
 
                 doc_id_input = driver.find_element(By.ID, doc_id_input_id)
                 doc_id_input.send_keys(doc_id)
@@ -165,10 +184,20 @@ def start_robot():
                 except TimeoutException:
                     print("Couldn't process row")
         driver.close()
+        get_log_file()
     else:
         print("Not authorized")
 
 
+def get_log_file():
+    if len(not_processed) > 0:
+        with open("not_processed.csv", "w", encoding="UTF-8", newline="") as csvfile:
+            writer = csv.writer(csvfile)
+            for item in not_processed:
+                writer.writerow(item)
+            print("Writing finished")
+    else:
+        print("Fully processed the input file")
 
 
 # main GUI root
