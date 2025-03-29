@@ -1,7 +1,6 @@
 import csv
 import tkinter
 import tkinter.filedialog
-import os
 import re
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -99,8 +98,8 @@ def start_robot():
                         mp_input.send_keys(mp)
 
                         search_btn = driver.find_element(By.ID, search_btn_id)
-                        search_btn.click()
-                        down_arrow = WebDriverWait(driver, 10).until(
+                        search_btn.send_keys(Keys.RETURN)
+                        down_arrow = WebDriverWait(driver, 30).until(
                             EC.element_to_be_clickable((By.CLASS_NAME, "fa-chevron-down"))
                         )
                         down_arrow.click()
@@ -221,7 +220,7 @@ auth_done_btn.grid(row=3, column=1)
 start_btn = ttk.Button(main_frame, text="Start", command=start_robot)
 start_btn.grid(row=3, column=2)
 text_box.grid(row=4, column=0)
-doc_id_label = ttk.Label(main_frame, text="Doc ID:")
+doc_id_label = ttk.Label(main_frame, text="Doc ID:") 
 doc_id_label.grid(row=0, column=0)
 doc_id_entry = ttk.Entry(main_frame, textvariable=doc_id_var)
 doc_id_entry.grid(row=0, column=1)
