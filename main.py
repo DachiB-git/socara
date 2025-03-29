@@ -106,6 +106,8 @@ def start_robot():
                         break
                     except TimeoutException:
                         continue
+                    except StaleElementReferenceException:
+                        continue
 
                 div_list = []
                 while len(div_list) != 3:
